@@ -72,7 +72,9 @@
       document.getElementById('btn-update-words').addEventListener('click', () => this.updateWords());
       document.getElementById('btn-add-word-pair').addEventListener('click', () => this.addWordPair());
       document.querySelectorAll('.diff-btn').forEach(btn => {
-        btn.addEventListener('click', () => this.selectDifficulty(btn.dataset.diff));
+        btn.addEventListener('click', function() {
+          App.selectDifficulty(this.dataset.diff);
+        });
       });
     },
     showPage(name) {
