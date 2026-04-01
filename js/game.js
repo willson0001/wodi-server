@@ -88,7 +88,16 @@
       if (this.socket) {
         this.socket.disconnect();
       }
-      this.socket = io(window.SERVER_URL, { transports: ['websocket', 'polling'] });
+      this.socket = io(window.SERVER_URL, { 
+        transports: ['websocket', 'polling'],
+        upgrade: true,
+        rememberUpgrade: true,
+        timeout: 10000,
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5
+      });
       this.socket.on('connect', () => this.onConnect());
       this.socket.on('disconnect', () => this.onDisconnect());
       this.socket.on('ROOM_CREATED', (data) => this.onRoomCreated(data));
