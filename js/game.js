@@ -27,7 +27,13 @@
       const params = new URLSearchParams(window.location.search);
       if (params.get('room')) {
         this.showPage('join');
-        document.getElementById('join-room-id').value = params.get('room').toUpperCase();
+        setTimeout(() => {
+          const roomIdInput = document.getElementById('join-room-id');
+          if (roomIdInput) {
+            roomIdInput.value = params.get('room').toUpperCase();
+            roomIdInput.readOnly = true;
+          }
+        }, 50);
       } else {
         this.showPage('home');
       }
@@ -706,11 +712,6 @@
       this.showPage('waiting');
     },
     updateWords() {
-      const url = document.getElementById('remote-words-url').value.trim();
-      if (!url) return;
-      this.socket.emit('FETCH_WORDS', { url });
-    },
-    fetchRemoteWords() {
       const url = document.getElementById('remote-words-url').value.trim();
       if (!url) return;
       this.socket.emit('FETCH_WORDS', { url });
