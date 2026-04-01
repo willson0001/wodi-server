@@ -434,6 +434,14 @@
         } else {
           btn.textContent = '开始游戏';
         }
+      } else {
+        const waitingHint = document.querySelector('#page-waiting .waiting-hint');
+        if (waitingHint) {
+          const remain = 4 - this.state.players.length;
+          waitingHint.innerHTML = remain > 0
+            ? `⏳ 等待法官（还差 ${remain} 人）...`
+            : '⏳ 等待法官开始游戏...';
+        }
       }
     },
     renderCurrentPage() {
@@ -730,8 +738,9 @@
       let oldOver = document.getElementById('page-game-over');
       if (oldOver) oldOver.remove();
       document.getElementById('app').insertAdjacentHTML('beforeend', html);
-      document.getElementById('btn-play-again')?.addEventListener('click', () => this.playAgain());
-      document.getElementById('btn-back-to-home')?.addEventListener('click', () => this.backToHome());
+      if (isHost) {
+        document.getElementById('btn-play-again')?.addEventListener('click', () => this.playAgain());
+      }
     },
     renderHostOfflineBar() {
       let bar = document.getElementById('host-offline-bar');
