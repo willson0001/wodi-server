@@ -309,7 +309,6 @@
       this.showPage('game-over');
     },
     takeOverHost() {
-      if (!this.state.isHost) return;
       this.socket.emit('TAKE_OVER_HOST');
     },
     onHostChanged(data) {

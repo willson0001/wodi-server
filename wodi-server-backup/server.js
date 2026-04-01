@@ -561,7 +561,6 @@ io.on('connection', (socket) => {
     if (!currentRoomId || !currentPlayerId) return;
     const room = rooms.get(currentRoomId);
     if (!room) return;
-    if (room.status !== 'playing') return;
     const oldHost = room.players.get(room.hostId);
     const lastBeat = playerHeartbeat.get(room.hostId) || 0;
     if (Date.now() - lastBeat < 120000) return;
@@ -575,6 +574,7 @@ io.on('connection', (socket) => {
       newHostName: newHost ? newHost.name : null
     });
     broadcastRoomState(currentRoomId);
+    console.log(`Player ${currentPlayerId} took over host from ${oldHost ? oldHost.id : 'unknown'}`);
   });
 
   socket.on('HEARTBEAT', (data) => {
@@ -595,6 +595,7 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomId);
     if (!room) return;
     
+    const isHost = currentPlayerId === room.hostId;
     room.players.delete(currentPlayerId);
     playerRooms.delete(currentPlayerId);
     playerHeartbeat.delete(currentPlayerId);
@@ -605,6 +606,10 @@ io.on('connection', (socket) => {
         id: p.id, name: p.name, number: p.number, isHost: p.isHost, alive: p.alive
       }))
     });
+    
+    if (isHost) {
+      io.to(roomId).emit('HOST_OFFLINE_WARNING');
+    }
     
     if (room.players.size === 0) {
       rooms.delete(roomId);
@@ -623,6 +628,11 @@ io.on('connection', (socket) => {
         player.online = false;
       }
       io.to(currentRoomId).emit('PLAYER_OFFLINE', { playerId: currentPlayerId, playerName: player?.name });
+      
+      if (currentPlayerId === room.hostId) {
+        io.to(currentRoomId).emit('HOST_OFFLINE_WARNING');
+      }
+      
       if (room.status === 'waiting') {
         room.players.delete(currentPlayerId);
         io.to(currentRoomId).emit('PLAYER_LEFT', {
