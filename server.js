@@ -59,7 +59,7 @@ function getAlivePlayers(roomId) {
   if (!room) return [];
   const alive = [];
   room.players.forEach((p, id) => {
-    if (p.alive) alive.push({ id, ...p });
+    if (p.alive) alive.push(p);
   });
   return alive;
 }
