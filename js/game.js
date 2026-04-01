@@ -322,6 +322,7 @@
       this.renderGamePage();
     },
     onHostOfflineWarning() {
+      console.log('HOST_OFFLINE_WARNING received');
       this.state.hostOfflineWarning = true;
       this.renderHostOfflineBar();
     },
@@ -416,6 +417,7 @@
       if (isHost) {
         document.getElementById('btn-start-game')?.addEventListener('click', () => this.startGame());
       }
+      this.renderHostOfflineBar();
       this.renderWaitingPlayerList();
     },
     renderWaitingPlayerList() {
