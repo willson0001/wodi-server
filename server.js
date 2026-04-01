@@ -342,7 +342,6 @@ io.on('connection', (socket) => {
       socket.emit('ERROR', { message: '至少需要4人才能开始' });
       return;
     }
-    room.phase = 'wordAssign';
     room.phase = 'describe';
     room.round = 1;
     room.status = 'playing';
@@ -457,6 +456,28 @@ io.on('connection', (socket) => {
     resetVotes(currentRoomId);
     io.to(currentRoomId).emit('NEXT_ROUND_START', { round: room.round, phase: 'describe' });
     broadcastRoomState(currentRoomId);
+  });
+
+  socket.on('RESTART_GAME', () => {
+    if (!currentRoomId || !currentPlayerId) return;
+    const room = rooms.get(currentRoomId);
+    if (!room) return;
+    if (room.hostId !== currentPlayerId) return;
+    room.status = 'waiting';
+    room.phase = 'waiting';
+    room.round = 0;
+    room.lastEliminated = null;
+    room.wordPair = null;
+    resetVotes(currentRoomId);
+    room.players.forEach(p => {
+      p.alive = true;
+      p.role = null;
+      p.word = null;
+      p.votedFor = null;
+    });
+    io.to(currentRoomId).emit('GAME_RESTARTED', {
+      players: getPlayersSnapshot(currentRoomId)
+    });
   });
 
   socket.on('RESTART_VOTE', () => {
