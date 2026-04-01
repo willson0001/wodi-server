@@ -44,14 +44,24 @@
       }
     },
     bindWindowEvents() {
+      let visibilityChangeTimer = null;
+      
       window.addEventListener('beforeunload', () => {
         if (this.socket && this.state.roomId) {
           this.socket.emit('LEAVE_ROOM', { roomId: this.state.roomId });
         }
       });
+      
       document.addEventListener('visibilitychange', () => {
         if (document.hidden && this.socket && this.state.roomId) {
-          this.socket.emit('LEAVE_ROOM', { roomId: this.state.roomId });
+          // 页面隐藏时，设置一个定时器，30分钟后再发送离开事件
+          visibilityChangeTimer = setTimeout(() => {
+            this.socket.emit('LEAVE_ROOM', { roomId: this.state.roomId });
+          }, 30 * 60 * 1000); // 30分钟延迟
+        } else if (!document.hidden && visibilityChangeTimer) {
+          // 页面重新可见时，清除定时器
+          clearTimeout(visibilityChangeTimer);
+          visibilityChangeTimer = null;
         }
       });
     },
