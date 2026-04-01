@@ -53,32 +53,18 @@
       });
     },
     bindEvents() {
-      document.getElementById('btn-create-room').addEventListener('click', () => this.showPage('create'));
-      document.getElementById('btn-join-room').addEventListener('click', () => this.showPage('join'));
-      document.getElementById('btn-back-home').addEventListener('click', () => this.showPage('home'));
-      document.getElementById('btn-back-home-join').addEventListener('click', () => this.showPage('home'));
-      document.getElementById('btn-confirm-create').addEventListener('click', () => this.createRoom());
-      document.getElementById('btn-confirm-join').addEventListener('click', () => this.joinRoom());
-      document.getElementById('btn-start-game').addEventListener('click', () => this.startGame());
-      document.getElementById('btn-set-phase-describe').addEventListener('click', () => this.setPhase('describe'));
-      document.getElementById('btn-set-phase-vote').addEventListener('click', () => this.setPhase('vote'));
-      document.getElementById('btn-next-round').addEventListener('click', () => this.nextRound());
-      document.getElementById('btn-restart-vote').addEventListener('click', () => this.restartVote());
-      document.getElementById('btn-takeover-host').addEventListener('click', () => this.takeOverHost());
-      document.getElementById('btn-play-again').addEventListener('click', () => this.playAgain());
-      document.getElementById('btn-back-to-home').addEventListener('click', () => this.backToHome());
-      document.getElementById('btn-open-wordbank').addEventListener('click', () => this.openWordBank());
-      document.getElementById('btn-back-from-wordbank').addEventListener('click', () => this.closeWordBank());
-      document.getElementById('btn-update-words').addEventListener('click', () => this.updateWords());
-      document.getElementById('btn-add-word-pair').addEventListener('click', () => this.addWordPair());
-      document.querySelectorAll('.diff-btn').forEach(btn => {
-        btn.addEventListener('click', () => this.selectDifficulty(btn.dataset.diff));
-      });
-      document.querySelectorAll('.preset-source-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.getElementById('remote-words-url').value = btn.dataset.url;
-        });
-      });
+      const btnCreateRoom = document.getElementById('btn-create-room');
+      if (btnCreateRoom) btnCreateRoom.addEventListener('click', () => this.showPage('create'));
+      const btnJoinRoom = document.getElementById('btn-join-room');
+      if (btnJoinRoom) btnJoinRoom.addEventListener('click', () => this.showPage('join'));
+      const btnBackHome = document.getElementById('btn-back-home');
+      if (btnBackHome) btnBackHome.addEventListener('click', () => this.showPage('home'));
+      const btnBackHomeJoin = document.getElementById('btn-back-home-join');
+      if (btnBackHomeJoin) btnBackHomeJoin.addEventListener('click', () => this.showPage('home'));
+      const btnConfirmCreate = document.getElementById('btn-confirm-create');
+      if (btnConfirmCreate) btnConfirmCreate.addEventListener('click', () => this.createRoom());
+      const btnConfirmJoin = document.getElementById('btn-confirm-join');
+      if (btnConfirmJoin) btnConfirmJoin.addEventListener('click', () => this.joinRoom());
     },
     showPage(name) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -91,6 +77,44 @@
       if (name === 'create') {
         document.querySelectorAll('.diff-btn').forEach(btn => {
           btn.addEventListener('click', () => this.selectDifficulty(btn.dataset.diff));
+        });
+      }
+      if (name === 'waiting') {
+        const btnStartGame = document.getElementById('btn-start-game');
+        if (btnStartGame) btnStartGame.addEventListener('click', () => this.startGame());
+        const btnWaitingWordbank = document.getElementById('btn-waiting-wordbank');
+        if (btnWaitingWordbank) btnWaitingWordbank.addEventListener('click', () => this.openWordBank());
+      }
+      if (name === 'game') {
+        const btnSetPhaseDescribe = document.getElementById('btn-set-phase-describe');
+        if (btnSetPhaseDescribe) btnSetPhaseDescribe.addEventListener('click', () => this.setPhase('describe'));
+        const btnSetPhaseVote = document.getElementById('btn-set-phase-vote');
+        if (btnSetPhaseVote) btnSetPhaseVote.addEventListener('click', () => this.setPhase('vote'));
+        const btnNextRound = document.getElementById('btn-next-round');
+        if (btnNextRound) btnNextRound.addEventListener('click', () => this.nextRound());
+        const btnRestartVote = document.getElementById('btn-restart-vote');
+        if (btnRestartVote) btnRestartVote.addEventListener('click', () => this.restartVote());
+        const btnTakeoverHost = document.getElementById('btn-takeover-host');
+        if (btnTakeoverHost) btnTakeoverHost.addEventListener('click', () => this.takeOverHost());
+      }
+      if (name === 'result') {
+        const btnPlayAgain = document.getElementById('btn-play-again');
+        if (btnPlayAgain) btnPlayAgain.addEventListener('click', () => this.playAgain());
+        const btnBackToHome = document.getElementById('btn-back-to-home');
+        if (btnBackToHome) btnBackToHome.addEventListener('click', () => this.backToHome());
+      }
+      if (name === 'wordbank') {
+        const btnBackFromWordbank = document.getElementById('btn-back-from-wordbank');
+        if (btnBackFromWordbank) btnBackFromWordbank.addEventListener('click', () => this.closeWordBank());
+        const btnUpdateWords = document.getElementById('btn-update-words');
+        if (btnUpdateWords) btnUpdateWords.addEventListener('click', () => this.updateWords());
+        const btnAddWordPair = document.getElementById('btn-add-word-pair');
+        if (btnAddWordPair) btnAddWordPair.addEventListener('click', () => this.addWordPair());
+        document.querySelectorAll('.preset-source-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const remoteWordsUrl = document.getElementById('remote-words-url');
+            if (remoteWordsUrl) remoteWordsUrl.value = btn.dataset.url;
+          });
         });
       }
     },
