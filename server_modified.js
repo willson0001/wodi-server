@@ -23,7 +23,7 @@ const rooms = new Map();
 const playerRooms = new Map();
 const playerHeartbeat = new Map();
 
-const ROOM_ID_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const ROOM_ID_CHARS = '0123456789';
 
 function generateRoomId() {
   let id;
