@@ -359,15 +359,23 @@
             <div id="waiting-player-list" class="player-list"></div>
           </div>
           <div id="waiting-error"></div>
+          ${isHost ? `
           <button class="btn btn-primary" id="btn-start-game" ${this.state.players.length < 4 ? 'disabled' : ''}>
             ${this.state.players.length < 4 ? `还需 ${4 - this.state.players.length} 人` : '开始游戏'}
           </button>
+          ` : `
+          <div style="text-align:center;color:var(--text2);font-size:14px;padding:16px">
+            ⏳ 等待法官${this.state.players.length < 4 ? `（还差 ${4 - this.state.players.length} 人）` : '开始游戏'}...
+          </div>
+          `}
         </div>
       `;
       const oldWaiting = document.getElementById('page-waiting');
       if (oldWaiting) oldWaiting.remove();
       document.getElementById('app').insertAdjacentHTML('beforeend', html);
-      document.getElementById('btn-start-game').addEventListener('click', () => this.startGame());
+      if (isHost) {
+        document.getElementById('btn-start-game')?.addEventListener('click', () => this.startGame());
+      }
       this.renderWaitingPlayerList();
     },
     renderWaitingPlayerList() {
@@ -473,7 +481,7 @@
             ${actionArea}
             ${voteProgress}
           </div>
-          ${this.renderPlayerListHTML(alivePlayers, deadPlayers, phase)}
+          ${this.renderPlayerListHTML(alivePlayers, deadPlayers, phase, this.state.status)}
         </div>
       `;
 
@@ -497,12 +505,13 @@
 
       this.renderHostOfflineBar();
     },
-    renderPlayerListHTML(alive, dead, phase) {
+    renderPlayerListHTML(alive, dead, phase, status) {
       const isHost = this.state.isHost;
       const meId = this.state.playerId;
       const canVote = (phase === 'vote') && !this.state.votedFor;
       const votedFor = this.state.votedFor;
       const voteResult = this.state.voteResult;
+      const canKick = isHost && status === 'waiting';
 
       let aliveHtml = alive.map(p => {
         let classes = ['player-item'];
@@ -511,14 +520,11 @@
         if (p.id === meId && isHost) classes.push('self');
         if (p.id === votedFor) classes.push('voted');
         let right = '';
-        if (isHost && p.id !== meId) {
-          if (canVote) {
-            right = '<span style="color:var(--primary);font-size:13px">点我投票</span>';
-          } else {
-            right = `<button class="btn-kick" onclick="App.kickPlayer('${p.id}')">踢</button>`;
-          }
-        }
-        if (!isHost && voteResult && voteResult[p.id]) {
+        if (canKick && p.id !== meId) {
+          right = `<button class="btn-kick" onclick="App.kickPlayer('${p.id}')">踢</button>`;
+        } else if (isHost && canVote && p.id !== meId) {
+          right = '<span style="color:var(--primary);font-size:13px">点我投票</span>';
+        } else if (!isHost && voteResult && voteResult[p.id]) {
           right = `<span class="vote-count">${voteResult[p.id]}票</span>`;
         }
         return `
