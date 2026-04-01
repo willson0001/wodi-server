@@ -26,15 +26,16 @@
       this.bindEvents();
       this.bindWindowEvents();
       const params = new URLSearchParams(window.location.search);
-      if (params.get('room')) {
+      const roomParam = params.get('room');
+      if (roomParam) {
         this.showPage('join');
         setTimeout(() => {
           const roomIdInput = document.getElementById('join-room-id');
           if (roomIdInput) {
-            roomIdInput.value = params.get('room').toUpperCase();
+            roomIdInput.value = roomParam.toUpperCase();
             roomIdInput.readOnly = true;
           }
-        }, 50);
+        }, 100);
       } else {
         this.showPage('home');
       }
@@ -377,7 +378,7 @@
               <p style="font-size:40px;font-weight:800;letter-spacing:12px;color:var(--accent)">${roomId}</p>
             </div>
             <p style="color:var(--text2);font-size:13px">将链接发到微信群：</p>
-            <p style="font-size:12px;color:var(--primary);word-break:break-all;background:var(--card2);padding:10px;border-radius:8px;margin-top:8px">${window.location.origin}?room=${roomId}</p>
+            <p style="font-size:12px;color:var(--primary);word-break:break-all;background:var(--card2);padding:10px;border-radius:8px;margin-top:8px">${window.location.href}</p>
           </div>
           <div class="card fade-in">
             <h3 style="margin-bottom:12px">等待玩家加入（${this.state.players.length}人）</h3>
@@ -389,7 +390,7 @@
             ${this.state.players.length < 4 ? `还需 ${4 - this.state.players.length} 人` : '开始游戏'}
           </button>
           ` : `
-          <div style="text-align:center;color:var(--text2);font-size:14px;padding:16px">
+          <div class="waiting-hint" style="text-align:center;color:var(--text2);font-size:14px;padding:16px">
             ⏳ 等待法官${this.state.players.length < 4 ? `（还差 ${4 - this.state.players.length} 人）` : '开始游戏'}...
           </div>
           `}
