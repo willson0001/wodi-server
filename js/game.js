@@ -77,7 +77,6 @@
       document.getElementById('btn-set-phase-vote').addEventListener('click', () => this.setPhase('vote'));
       document.getElementById('btn-next-round').addEventListener('click', () => this.nextRound());
       document.getElementById('btn-restart-vote').addEventListener('click', () => this.restartVote());
-      document.getElementById('btn-takeover-host').addEventListener('click', () => this.takeOverHost());
       document.getElementById('btn-play-again').addEventListener('click', () => this.playAgain());
       document.getElementById('btn-back-to-home').addEventListener('click', () => this.backToHome());
       document.getElementById('btn-open-wordbank').addEventListener('click', () => this.openWordBank());
@@ -121,7 +120,6 @@
       this.socket.on('PLAYER_ELIMINATED', (data) => this.onPlayerEliminated(data));
       this.socket.on('GAME_OVER', (data) => this.onGameOver(data));
       this.socket.on('HOST_CHANGED', (data) => this.onHostChanged(data));
-      this.socket.on('HOST_OFFLINE_WARNING', () => this.onHostOfflineWarning());
       this.socket.on('ROOM_CLOSED', () => this.onRoomClosed());
       this.socket.on('GAME_RESTARTED', (data) => this.onGameRestarted(data));
       this.socket.on('FETCH_WORDS_RESULT', (data) => this.onFetchWordsResult(data));
@@ -308,28 +306,13 @@
       this.renderGameOver();
       this.showPage('game-over');
     },
-    takeOverHost() {
-      this.socket.emit('TAKE_OVER_HOST');
-    },
     onHostChanged(data) {
       this.state.isHost = (data.newHostId === this.state.playerId);
-      this.state.hostOfflineWarning = false;
       this.state.players = this.state.players.map(p => ({
         ...p,
         isHost: p.id === data.newHostId
       }));
-      document.getElementById('host-offline-bar')?.classList.remove('show');
       this.renderGamePage();
-    },
-    onHostOfflineWarning() {
-      console.log('HOST_OFFLINE_WARNING received - hostOfflineWarning set to true');
-      console.log('Current state:', {
-        isHost: this.state.isHost,
-        hostOfflineWarning: this.state.hostOfflineWarning,
-        players: this.state.players.map(p => ({id: p.id, name: p.name, isHost: p.isHost}))
-      });
-      this.state.hostOfflineWarning = true;
-      this.renderHostOfflineBar();
     },
     onRoomClosed() {
       this.showError('房间已关闭');
@@ -422,7 +405,6 @@
       if (isHost) {
         document.getElementById('btn-start-game')?.addEventListener('click', () => this.startGame());
       }
-      this.renderHostOfflineBar();
       this.renderWaitingPlayerList();
     },
     renderWaitingPlayerList() {
@@ -567,8 +549,6 @@
         document.getElementById('btn-restart-vote')?.addEventListener('click', () => this.restartVote());
         document.getElementById('btn-reassign-words')?.addEventListener('click', () => this.reassignWords());
       }
-
-      this.renderHostOfflineBar();
     },
     renderPlayerListHTML(alive, dead, phase, status) {
       const isHost = this.state.isHost;
@@ -762,18 +742,6 @@
       document.getElementById('app').insertAdjacentHTML('beforeend', html);
       if (isHost) {
         document.getElementById('btn-play-again')?.addEventListener('click', () => this.playAgain());
-      }
-    },
-    renderHostOfflineBar() {
-      let bar = document.getElementById('host-offline-bar');
-      if (!bar) {
-        document.body.insertAdjacentHTML('beforeend', '<div id="host-offline-bar" class="host-offline-warning">⚠️ 法官已离线，是否接管？<button onclick="App.takeOverHost()" style="background:#000;color:#ffd93d;border:none;padding:4px 12px;border-radius:6px;margin-left:10px;font-weight:600;cursor:pointer">接管</button></div>');
-        bar = document.getElementById('host-offline-bar');
-      }
-      if (this.state.hostOfflineWarning && !this.state.isHost) {
-        bar.classList.add('show');
-      } else {
-        bar.classList.remove('show');
       }
     },
     openWordBank() {
