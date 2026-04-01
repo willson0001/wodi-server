@@ -122,6 +122,20 @@ h3 {
   border: 1px solid var(--border);
 }
 
+.btn-kick {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-kick:active {
+  opacity: 0.7;
+}
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;

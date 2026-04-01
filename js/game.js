@@ -94,6 +94,7 @@
       this.socket.on('ROOM_CLOSED', () => this.onRoomClosed());
       this.socket.on('GAME_RESTARTED', (data) => this.onGameRestarted(data));
       this.socket.on('FETCH_WORDS_RESULT', (data) => this.onFetchWordsResult(data));
+      this.socket.on('KICKED', () => this.onKicked());
       this.socket.on('PING', () => {});
     },
     onConnect() {
@@ -300,6 +301,18 @@
       if (!this.state.isHost) return;
       this.socket.emit('RESTART_GAME');
     },
+    kickPlayer(targetId) {
+      if (!this.state.isHost) return;
+      this.socket.emit('KICK_PLAYER', { targetId });
+    },
+    reassignWords() {
+      if (!this.state.isHost) return;
+      this.socket.emit('REASSIGN_WORDS');
+    },
+    onKicked() {
+      this.showError('你已被法官移出房间');
+      this.backToHome();
+    },
     onGameRestarted(data) {
       this.state.status = 'waiting';
       this.state.phase = 'waiting';
@@ -360,15 +373,20 @@
     renderWaitingPlayerList() {
       const list = document.getElementById('waiting-player-list');
       if (!list) return;
-      list.innerHTML = this.state.players.map(p => `
-        <div class="player-item ${p.id === this.state.playerId ? 'self' : ''}">
-          <div class="avatar ${p.isHost ? 'host' : ''}">${p.number}</div>
-          <div class="info">
-            <div class="name">${this.escapeHtml(p.name)}</div>
-            <div class="sub">${p.id === this.state.playerId ? '（你）' : ''} ${p.isHost ? '<span class="badge host">法官</span>' : ''}</div>
+      list.innerHTML = this.state.players.map(p => {
+        const isMe = p.id === this.state.playerId;
+        const canKick = this.state.isHost && !isMe;
+        return `
+          <div class="player-item ${isMe ? 'self' : ''}">
+            <div class="avatar ${p.isHost ? 'host' : ''}">${p.number}</div>
+            <div class="info">
+              <div class="name">${this.escapeHtml(p.name)}</div>
+              <div class="sub">${isMe ? '（你）' : ''} ${p.isHost ? '<span class="badge host">法官</span>' : ''}</div>
+            </div>
+            ${canKick ? `<button class="btn-kick" onclick="App.kickPlayer('${p.id}')">踢</button>` : ''}
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
       const btn = document.getElementById('btn-start-game');
       if (btn) {
         btn.disabled = this.state.players.length < 4;
@@ -411,8 +429,8 @@
           <div style="display:flex;gap:10px;margin-top:12px">
             ${phase === 'describe' ? '<button class="btn btn-primary" id="btn-set-phase-vote">进入投票</button>' : ''}
             ${phase === 'vote' ? '<button class="btn btn-primary" disabled>等待投票...</button>' : ''}
+            <button class="btn btn-ghost" id="btn-reassign-words">换词重开</button>
           </div>
-          ${phase !== 'describe' && phase !== 'vote' ? '' : ''}
         `;
       } else {
         actionArea = `
@@ -474,6 +492,7 @@
         document.getElementById('btn-set-phase-describe')?.addEventListener('click', () => this.setPhase('describe'));
         document.getElementById('btn-next-round')?.addEventListener('click', () => this.nextRound());
         document.getElementById('btn-restart-vote')?.addEventListener('click', () => this.restartVote());
+        document.getElementById('btn-reassign-words')?.addEventListener('click', () => this.reassignWords());
       }
 
       this.renderHostOfflineBar();
@@ -492,10 +511,14 @@
         if (p.id === meId && isHost) classes.push('self');
         if (p.id === votedFor) classes.push('voted');
         let right = '';
-        if (isHost && canVote && p.id !== meId) {
-          right = '<span style="color:var(--primary);font-size:13px">点我投票</span>';
+        if (isHost && p.id !== meId) {
+          if (canVote) {
+            right = '<span style="color:var(--primary);font-size:13px">点我投票</span>';
+          } else {
+            right = `<button class="btn-kick" onclick="App.kickPlayer('${p.id}')">踢</button>`;
+          }
         }
-        if (voteResult && voteResult[p.id]) {
+        if (!isHost && voteResult && voteResult[p.id]) {
           right = `<span class="vote-count">${voteResult[p.id]}票</span>`;
         }
         return `
