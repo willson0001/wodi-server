@@ -40,7 +40,9 @@
     },
     bindEvents() {
       document.getElementById('btn-create-room').addEventListener('click', () => this.showPage('create'));
+      document.getElementById('btn-join-room').addEventListener('click', () => this.showPage('join'));
       document.getElementById('btn-back-home').addEventListener('click', () => this.showPage('home'));
+      document.getElementById('btn-back-home-join').addEventListener('click', () => this.showPage('home'));
       document.getElementById('btn-confirm-create').addEventListener('click', () => this.createRoom());
       document.getElementById('btn-confirm-join').addEventListener('click', () => this.joinRoom());
       document.getElementById('btn-start-game').addEventListener('click', () => this.startGame());
@@ -103,6 +105,8 @@
     onDisconnect() {
       console.log('Disconnected from server');
       if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+      this.socket = null;
     },
     startHeartbeat() {
       if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
@@ -324,24 +328,32 @@
       this.state.gameResult = null;
       this.state.votedFor = null;
       this.state.players = data.players;
+      this.startHeartbeat();
       this.renderWaitingRoom();
       this.showPage('waiting');
     },
     backToHome() {
-      if (this.socket) this.socket.disconnect();
+      if (this.socket) {
+        this.socket.disconnect();
+        this.socket = null;
+      }
+      if (this.heartbeatTimer) {
+        clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = null;
+      }
       this.state = {
-        socket: null, playerId: null, roomId: null, playerName: null,
+        playerId: null, roomId: null, playerName: null,
         isHost: false, phase: 'loading', round: 0, status: 'loading',
         players: [], myWord: null, myRole: null, lastEliminated: null,
         votedFor: null, votesReceived: 0, voteResult: null,
         eliminated: null, isTie: false, gameResult: null, hostOfflineWarning: false
       };
-      if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
       this.showPage('home');
       window.history.replaceState({}, '', window.location.pathname);
     },
     renderWaitingRoom() {
       const roomId = this.state.roomId;
+      const isHost = this.state.isHost;
       let html = `
         <div class="page active" id="page-waiting">
           <div class="card fade-in" style="text-align:center">
@@ -516,8 +528,6 @@
       let aliveHtml = alive.map(p => {
         let classes = ['player-item'];
         if (p.id === meId) classes.push('self');
-        if (p.isHost) classes.push('');
-        if (p.id === meId && isHost) classes.push('self');
         if (p.id === votedFor) classes.push('voted');
         let right = '';
         if (canKick && p.id !== meId) {
@@ -592,8 +602,9 @@
     },
     renderVoteProgress() {
       const alive = this.state.players.filter(p => p.alive);
-      const voted = alive.filter(p => p.votedFor || p.id === this.state.playerId).length;
       const total = alive.length;
+      let voted = this.state.votedFor ? 1 : 0;
+      voted += alive.filter(p => p.votedFor && p.id !== this.state.playerId).length;
       let progressEl = document.getElementById('vote-progress');
       if (!progressEl) {
         const gameCard = document.querySelector('#page-game .card:first-child');
@@ -738,10 +749,19 @@
     addWordPair() {
       const wordA = document.getElementById('add-word-a').value.trim();
       const wordB = document.getElementById('add-word-b').value.trim();
-      if (!wordA || !wordB) return;
+      if (!wordA || !wordB) {
+        this.showError('请输入两个词语');
+        return;
+      }
+      if (this.socket && this.socket.connected) {
+        this.socket.emit('ADD_WORD_PAIR', { wordA, wordB });
+      }
       let msg = document.getElementById('words-result-msg');
-      msg.className = 'success-msg';
-      msg.textContent = '✅ 已添加（本地预览模式，可刷新后查看）';
+      if (msg) {
+        msg.className = 'success-msg';
+        msg.style.display = 'block';
+        msg.textContent = '✅ 已发送添加请求';
+      }
       document.getElementById('add-word-a').value = '';
       document.getElementById('add-word-b').value = '';
     },
