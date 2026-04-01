@@ -74,6 +74,11 @@
       document.querySelectorAll('.diff-btn').forEach(btn => {
         btn.addEventListener('click', () => this.selectDifficulty(btn.dataset.diff));
       });
+      document.querySelectorAll('.preset-source-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('remote-words-url').value = btn.dataset.url;
+        });
+      });
     },
     showPage(name) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -388,6 +393,9 @@
             </div>
             <p style="color:var(--text2);font-size:13px">将链接发到微信群：</p>
             <p style="font-size:12px;color:var(--primary);word-break:break-all;background:var(--card2);padding:10px;border-radius:8px;margin-top:8px">${window.location.href}</p>
+            ${isHost ? `
+            <button class="btn btn-secondary btn-small" id="btn-waiting-wordbank" style="margin-top:12px">📚 词库管理</button>
+            ` : ''}
           </div>
           <div class="card fade-in">
             <h3 style="margin-bottom:12px">等待玩家加入（${this.state.players.length}人）</h3>
@@ -410,6 +418,7 @@
       document.getElementById('app').insertAdjacentHTML('beforeend', html);
       if (isHost) {
         document.getElementById('btn-start-game')?.addEventListener('click', () => this.startGame());
+        document.getElementById('btn-waiting-wordbank')?.addEventListener('click', () => this.openWordBank());
       }
       this.renderWaitingPlayerList();
     },
@@ -781,7 +790,11 @@
       if (!msg) return;
       if (data.success) {
         msg.className = 'success-msg';
-        msg.textContent = `✅ 更新成功！共 ${data.count} 组词语`;
+        if (data.addedCount !== undefined) {
+          msg.textContent = `✅ 更新成功！新增 ${data.addedCount} 组，当前共 ${data.count} 组`;
+        } else {
+          msg.textContent = `✅ 当前词库：共 ${data.count} 组`;
+        }
       } else {
         msg.className = 'error-msg';
         msg.textContent = `❌ 更新失败：${data.error}`;
