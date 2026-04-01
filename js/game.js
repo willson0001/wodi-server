@@ -399,8 +399,8 @@
       let wordArea = `
         <div class="word-display">
           <p style="color:var(--text2);font-size:13px;margin-bottom:8px">你的词语是</p>
-          <div class="word masked" id="word-masked">长按查看</div>
-          <p class="hint">长按屏幕显示词语，松开隐藏</p>
+          <div class="word${word ? '' : ' masked'}" id="word-masked">${word || '长按查看'}</div>
+          ${!word ? '<p class="hint">长按屏幕显示词语，松开隐藏</p>' : ''}
         </div>
       `;
 
@@ -463,27 +463,6 @@
       const oldGameOver = document.getElementById('page-game-over');
       if (oldGameOver) oldGameOver.remove();
       document.getElementById('app').insertAdjacentHTML('beforeend', html);
-
-      if (word) {
-        const wordEl = document.getElementById('word-masked');
-        const wordDisplay = wordEl.parentElement;
-        let showing = false;
-        const showWord = () => {
-          showing = true;
-          wordEl.textContent = word;
-          wordEl.classList.remove('masked');
-        };
-        const hideWord = () => {
-          showing = false;
-          wordEl.textContent = '长按查看';
-          wordEl.classList.add('masked');
-        };
-        wordDisplay.addEventListener('touchstart', (e) => { e.preventDefault(); showWord(); });
-        wordDisplay.addEventListener('touchend', hideWord);
-        wordDisplay.addEventListener('mousedown', showWord);
-        wordDisplay.addEventListener('mouseup', hideWord);
-        wordDisplay.addEventListener('mouseleave', hideWord);
-      }
 
       if (phase === 'vote') {
         this.renderVotePanel();
