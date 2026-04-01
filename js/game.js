@@ -188,6 +188,7 @@
       this.socket.emit('START_GAME');
     },
     onGameStarted(data) {
+      console.log('GAME_STARTED myWord:', data.myWord, '| players:', data.players.length);
       this.state.phase = 'describe';
       this.state.round = data.round;
       this.state.status = 'playing';
