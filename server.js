@@ -383,6 +383,10 @@ io.on('connection', (socket) => {
       socket.emit('ERROR', { message: '只有法官可以踢人' });
       return;
     }
+    if (room.status !== 'waiting') {
+      socket.emit('ERROR', { message: '游戏已开始，无法踢人' });
+      return;
+    }
     const targetId = data.targetId;
     if (!targetId || targetId === currentPlayerId) return;
     if (!room.players.has(targetId)) return;
@@ -393,6 +397,8 @@ io.on('connection', (socket) => {
     room.players.delete(targetId);
     playerRooms.delete(targetId);
     playerHeartbeat.delete(targetId);
+    let num = 1;
+    room.players.forEach(p => { p.number = num++; });
     io.to(currentRoomId).emit('PLAYER_LEFT', {
       playerId: targetId,
       players: getPlayersSnapshot(currentRoomId).map(p => ({
