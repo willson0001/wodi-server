@@ -88,6 +88,11 @@
         page.classList.add('page-enter');
         setTimeout(() => page.classList.remove('page-enter'), 400);
       }
+      if (name === 'create') {
+        document.querySelectorAll('.diff-btn').forEach(btn => {
+          btn.addEventListener('click', () => this.selectDifficulty(btn.dataset.diff));
+        });
+      }
     },
     connect() {
       if (this.socket) {
