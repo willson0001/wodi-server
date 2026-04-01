@@ -589,6 +589,29 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('LEAVE_ROOM', (data) => {
+    const roomId = data.roomId;
+    if (!currentPlayerId || !roomId) return;
+    const room = rooms.get(roomId);
+    if (!room) return;
+    
+    room.players.delete(currentPlayerId);
+    playerRooms.delete(currentPlayerId);
+    playerHeartbeat.delete(currentPlayerId);
+    
+    io.to(roomId).emit('PLAYER_LEFT', {
+      playerId: currentPlayerId,
+      players: getPlayersSnapshot(roomId).map(p => ({
+        id: p.id, name: p.name, number: p.number, isHost: p.isHost, alive: p.alive
+      }))
+    });
+    
+    if (room.players.size === 0) {
+      rooms.delete(roomId);
+    }
+    console.log(`Player ${currentPlayerId} left room ${roomId}`);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
     if (!currentPlayerId) return;
@@ -611,24 +634,11 @@ io.on('connection', (socket) => {
         });
         if (room.players.size === 0) {
           rooms.delete(currentRoomId);
-        } else if (room.hostId === currentPlayerId) {
-          const nextHost = room.players.keys().next().value;
-          if (nextHost) {
-            room.hostId = nextHost;
-            const nh = room.players.get(nextHost);
-            if (nh) nh.isHost = true;
-            io.to(currentRoomId).emit('HOST_CHANGED', { newHostId: nextHost, newHostName: nh?.name });
-          }
         }
       }
     }
-    playerRooms.delete(currentPlayerId);
   });
 });
-
-setInterval(() => {
-  io.emit('PING');
-}, 30000);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
