@@ -23,8 +23,11 @@
     },
     heartbeatTimer: null,
     init() {
-      this.bindEvents();
       this.bindWindowEvents();
+      // 延迟绑定事件，确保页面完全加载
+      setTimeout(() => {
+        this.bindEvents();
+      }, 100);
       const params = new URLSearchParams(window.location.search);
       const roomParam = params.get('room');
       if (roomParam) {
@@ -35,7 +38,7 @@
             roomIdInput.value = roomParam.toUpperCase();
             roomIdInput.readOnly = true;
           }
-        }, 100);
+        }, 200);
       } else {
         this.showPage('home');
       }

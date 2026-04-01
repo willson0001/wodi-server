@@ -41,9 +41,9 @@
         <div class="input-group">
           <label style="margin-bottom:10px">选择词库难度</label>
           <div class="diff-selector">
-            <button class="diff-btn" data-diff="easy">简单</button>
-            <button class="diff-btn selected" data-diff="normal">普通</button>
-            <button class="diff-btn" data-diff="hard">困难</button>
+            <button class="diff-btn" data-diff="easy" onclick="App.selectDifficulty('easy')">简单</button>
+            <button class="diff-btn selected" data-diff="normal" onclick="App.selectDifficulty('normal')">普通</button>
+            <button class="diff-btn" data-diff="hard" onclick="App.selectDifficulty('hard')">困难</button>
           </div>
         </div>
         <button class="btn btn-primary" id="btn-confirm-create" style="margin-top:20px">创建房间</button>
