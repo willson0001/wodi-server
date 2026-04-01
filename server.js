@@ -309,7 +309,10 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     const playerData = { id: playerId, name: player.name, number: player.number, isHost: false, alive: true };
     socket.emit('ROOM_JOINED', { roomId, playerId, player: playerData });
-    socket.to(roomId).emit('PLAYER_JOINED', { player: playerData });
+    socket.to(roomId).emit('PLAYER_JOINED', {
+      player: playerData,
+      players: getPlayersSnapshot(roomId)
+    });
     socket.emit('ROOM_STATE', {
       roomId,
       phase: room.phase,
