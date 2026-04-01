@@ -429,14 +429,10 @@
       const btn = document.getElementById('btn-start-game');
       if (btn) {
         btn.disabled = this.state.players.length < 4;
-        btn.textContent = this.state.players.length < 4 ? `还需 ${4 - this.state.players.length} 人` : '开始游戏';
-      } else {
-        const waitingHint = document.querySelector('#page-waiting .waiting-hint');
-        if (waitingHint) {
-          const remain = 4 - this.state.players.length;
-          waitingHint.innerHTML = remain > 0
-            ? `⏳ 等待法官（还差 ${remain} 人）...`
-            : '⏳ 等待法官开始游戏...';
+        if (this.state.players.length < 4) {
+          btn.textContent = `还需 ${4 - this.state.players.length} 人`;
+        } else {
+          btn.textContent = '开始游戏';
         }
       }
     },
@@ -726,7 +722,6 @@
               ${isHost ? `
                 <button class="btn btn-primary" id="btn-play-again">再来一局</button>
               ` : ''}
-              <button class="btn btn-ghost" id="btn-back-to-home" style="margin-top:10px">返回首页</button>
             </div>
           </div>
         </div>
