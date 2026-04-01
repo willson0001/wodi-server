@@ -32,7 +32,7 @@
         setTimeout(() => {
           const roomIdInput = document.getElementById('join-room-id');
           if (roomIdInput) {
-            roomIdInput.value = roomParam;
+            roomIdInput.value = roomParam.toUpperCase();
             roomIdInput.readOnly = true;
           }
         }, 100);
@@ -53,18 +53,27 @@
       });
     },
     bindEvents() {
-      const btnCreateRoom = document.getElementById('btn-create-room');
-      if (btnCreateRoom) btnCreateRoom.addEventListener('click', () => this.showPage('create'));
-      const btnJoinRoom = document.getElementById('btn-join-room');
-      if (btnJoinRoom) btnJoinRoom.addEventListener('click', () => this.showPage('join'));
-      const btnBackHome = document.getElementById('btn-back-home');
-      if (btnBackHome) btnBackHome.addEventListener('click', () => this.showPage('home'));
-      const btnBackHomeJoin = document.getElementById('btn-back-home-join');
-      if (btnBackHomeJoin) btnBackHomeJoin.addEventListener('click', () => this.showPage('home'));
-      const btnConfirmCreate = document.getElementById('btn-confirm-create');
-      if (btnConfirmCreate) btnConfirmCreate.addEventListener('click', () => this.createRoom());
-      const btnConfirmJoin = document.getElementById('btn-confirm-join');
-      if (btnConfirmJoin) btnConfirmJoin.addEventListener('click', () => this.joinRoom());
+      document.getElementById('btn-create-room').addEventListener('click', () => this.showPage('create'));
+      document.getElementById('btn-join-room').addEventListener('click', () => this.showPage('join'));
+      document.getElementById('btn-back-home').addEventListener('click', () => this.showPage('home'));
+      document.getElementById('btn-back-home-join').addEventListener('click', () => this.showPage('home'));
+      document.getElementById('btn-confirm-create').addEventListener('click', () => this.createRoom());
+      document.getElementById('btn-confirm-join').addEventListener('click', () => this.joinRoom());
+      document.getElementById('btn-start-game').addEventListener('click', () => this.startGame());
+      document.getElementById('btn-set-phase-describe').addEventListener('click', () => this.setPhase('describe'));
+      document.getElementById('btn-set-phase-vote').addEventListener('click', () => this.setPhase('vote'));
+      document.getElementById('btn-next-round').addEventListener('click', () => this.nextRound());
+      document.getElementById('btn-restart-vote').addEventListener('click', () => this.restartVote());
+      document.getElementById('btn-takeover-host').addEventListener('click', () => this.takeOverHost());
+      document.getElementById('btn-play-again').addEventListener('click', () => this.playAgain());
+      document.getElementById('btn-back-to-home').addEventListener('click', () => this.backToHome());
+      document.getElementById('btn-open-wordbank').addEventListener('click', () => this.openWordBank());
+      document.getElementById('btn-back-from-wordbank').addEventListener('click', () => this.closeWordBank());
+      document.getElementById('btn-update-words').addEventListener('click', () => this.updateWords());
+      document.getElementById('btn-add-word-pair').addEventListener('click', () => this.addWordPair());
+      document.querySelectorAll('.diff-btn').forEach(btn => {
+        btn.addEventListener('click', () => this.selectDifficulty(btn.dataset.diff));
+      });
     },
     showPage(name) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -74,64 +83,12 @@
         page.classList.add('page-enter');
         setTimeout(() => page.classList.remove('page-enter'), 400);
       }
-      if (name === 'create') {
-        document.querySelectorAll('.diff-btn').forEach(btn => {
-          btn.addEventListener('click', () => this.selectDifficulty(btn.dataset.diff));
-        });
-      }
-      if (name === 'waiting') {
-        const btnStartGame = document.getElementById('btn-start-game');
-        if (btnStartGame) btnStartGame.addEventListener('click', () => this.startGame());
-        const btnWaitingWordbank = document.getElementById('btn-waiting-wordbank');
-        if (btnWaitingWordbank) btnWaitingWordbank.addEventListener('click', () => this.openWordBank());
-      }
-      if (name === 'game') {
-        const btnSetPhaseDescribe = document.getElementById('btn-set-phase-describe');
-        if (btnSetPhaseDescribe) btnSetPhaseDescribe.addEventListener('click', () => this.setPhase('describe'));
-        const btnSetPhaseVote = document.getElementById('btn-set-phase-vote');
-        if (btnSetPhaseVote) btnSetPhaseVote.addEventListener('click', () => this.setPhase('vote'));
-        const btnNextRound = document.getElementById('btn-next-round');
-        if (btnNextRound) btnNextRound.addEventListener('click', () => this.nextRound());
-        const btnRestartVote = document.getElementById('btn-restart-vote');
-        if (btnRestartVote) btnRestartVote.addEventListener('click', () => this.restartVote());
-        const btnTakeoverHost = document.getElementById('btn-takeover-host');
-        if (btnTakeoverHost) btnTakeoverHost.addEventListener('click', () => this.takeOverHost());
-      }
-      if (name === 'result') {
-        const btnPlayAgain = document.getElementById('btn-play-again');
-        if (btnPlayAgain) btnPlayAgain.addEventListener('click', () => this.playAgain());
-        const btnBackToHome = document.getElementById('btn-back-to-home');
-        if (btnBackToHome) btnBackToHome.addEventListener('click', () => this.backToHome());
-      }
-      if (name === 'wordbank') {
-        const btnBackFromWordbank = document.getElementById('btn-back-from-wordbank');
-        if (btnBackFromWordbank) btnBackFromWordbank.addEventListener('click', () => this.closeWordBank());
-        const btnUpdateWords = document.getElementById('btn-update-words');
-        if (btnUpdateWords) btnUpdateWords.addEventListener('click', () => this.updateWords());
-        const btnAddWordPair = document.getElementById('btn-add-word-pair');
-        if (btnAddWordPair) btnAddWordPair.addEventListener('click', () => this.addWordPair());
-        document.querySelectorAll('.preset-source-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const remoteWordsUrl = document.getElementById('remote-words-url');
-            if (remoteWordsUrl) remoteWordsUrl.value = btn.dataset.url;
-          });
-        });
-      }
     },
     connect() {
       if (this.socket) {
         this.socket.disconnect();
       }
-      this.socket = io(window.SERVER_URL, { 
-        transports: ['websocket', 'polling'],
-        upgrade: true,
-        rememberUpgrade: true,
-        timeout: 10000,
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: 5
-      });
+      this.socket = io(window.SERVER_URL, { transports: ['websocket', 'polling'] });
       this.socket.on('connect', () => this.onConnect());
       this.socket.on('disconnect', () => this.onDisconnect());
       this.socket.on('ROOM_CREATED', (data) => this.onRoomCreated(data));
@@ -195,7 +152,7 @@
     },
     joinRoom() {
       const name = document.getElementById('join-name').value.trim();
-      const roomId = document.getElementById('join-room-id').value.trim();
+      const roomId = document.getElementById('join-room-id').value.trim().toUpperCase();
       if (!name) { this.showError('请输入昵称'); return; }
       if (!roomId || roomId.length !== 4) { this.showError('请输入4位房间号'); return; }
       this.state.playerName = name;
@@ -422,9 +379,6 @@
             </div>
             <p style="color:var(--text2);font-size:13px">将链接发到微信群：</p>
             <p style="font-size:12px;color:var(--primary);word-break:break-all;background:var(--card2);padding:10px;border-radius:8px;margin-top:8px">${window.location.href}</p>
-            ${isHost ? `
-            <button class="btn btn-secondary btn-small" id="btn-waiting-wordbank" style="margin-top:12px">📚 词库管理</button>
-            ` : ''}
           </div>
           <div class="card fade-in">
             <h3 style="margin-bottom:12px">等待玩家加入（${this.state.players.length}人）</h3>
@@ -447,7 +401,6 @@
       document.getElementById('app').insertAdjacentHTML('beforeend', html);
       if (isHost) {
         document.getElementById('btn-start-game')?.addEventListener('click', () => this.startGame());
-        document.getElementById('btn-waiting-wordbank')?.addEventListener('click', () => this.openWordBank());
       }
       this.renderWaitingPlayerList();
     },
@@ -812,44 +765,17 @@
     updateWords() {
       const url = document.getElementById('remote-words-url').value.trim();
       if (!url) return;
-      
-      const btn = document.getElementById('btn-update-words');
-      const msg = document.getElementById('words-result-msg');
-      
-      btn.disabled = true;
-      btn.textContent = '更新中...';
-      msg.style.display = 'block';
-      msg.className = 'info-msg';
-      msg.textContent = '⏳ 正在更新词库，请稍候...';
-      
       this.socket.emit('FETCH_WORDS', { url });
-      
-      this.socket.once('FETCH_WORDS_RESULT', (data) => {
-        btn.disabled = false;
-        btn.textContent = '更新词库';
-        this.onFetchWordsResult(data);
-      });
     },
     onFetchWordsResult(data) {
       let msg = document.getElementById('words-result-msg');
       if (!msg) return;
-      msg.style.display = 'block';
       if (data.success) {
         msg.className = 'success-msg';
-        if (data.addedCount !== undefined) {
-          msg.textContent = `✅ 更新成功！新增 ${data.addedCount} 组，当前共 ${data.count} 组`;
-        } else {
-          msg.textContent = `✅ 当前词库：共 ${data.count} 组（版本：${data.version}）`;
-        }
+        msg.textContent = `✅ 更新成功！共 ${data.count} 组词语`;
       } else {
         msg.className = 'error-msg';
-        if (data.error.includes('timeout')) {
-          msg.textContent = `❌ 更新失败：请求超时，请检查网络连接`;
-        } else if (data.error.includes('Invalid format')) {
-          msg.textContent = `❌ 更新失败：词库格式不正确`;
-        } else {
-          msg.textContent = `❌ 更新失败：${data.error}`;
-        }
+        msg.textContent = `❌ 更新失败：${data.error}`;
       }
     },
     addWordPair() {

@@ -74,15 +74,8 @@
       </div>
       <div class="card" style="margin-bottom:12px">
         <h3 style="margin-bottom:10px">🌐 在线更新词库</h3>
-        <div style="margin-bottom:10px">
-          <p style="color:var(--text2);font-size:13px;margin-bottom:8px">预设词库源：</p>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="btn btn-secondary btn-small preset-source-btn" data-url="https://gitee.com/willson0001/wodi-words/raw/master/words.json">Gitee 国内镜像</button>
-            <button class="btn btn-secondary btn-small preset-source-btn" data-url="https://raw.githubusercontent.com/willson0001/wodi-frontend/main/words.json">GitHub 官方源</button>
-          </div>
-        </div>
         <div class="input-group" style="margin-bottom:10px">
-          <input class="input" id="remote-words-url" type="text" placeholder="或输入自定义 words.json 的 URL 地址" style="font-size:13px">
+          <input class="input" id="remote-words-url" type="text" placeholder="输入 words.json 的 URL 地址" style="font-size:13px">
         </div>
         <div id="words-result-msg" style="margin-bottom:10px;display:none"></div>
         <button class="btn btn-primary btn-small" id="btn-update-words">更新词库</button>
@@ -101,7 +94,7 @@
 
   </div>
 
-  <script src="https://cdn.bootcdn.net/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/game.js"></script>
 </body>
