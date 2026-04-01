@@ -185,6 +185,16 @@ setInterval(() => {
   });
 }, 60000);
 
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    service: '谁是卧底 WebSocket 服务器',
+    version: '1.0.0',
+    rooms: rooms.size,
+    uptime: process.uptime()
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', rooms: rooms.size });
 });
@@ -674,5 +684,11 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`========================================`);
+  console.log(`谁是卧底服务器已启动`);
+  console.log(`端口: ${PORT}`);
+  console.log(`环境: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`词库版本: ${words.version}`);
+  console.log(`词库数量: ${words.easy.length + words.normal.length + words.hard.length}`);
+  console.log(`========================================`);
 });
