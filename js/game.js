@@ -54,7 +54,6 @@
       document.getElementById('btn-open-wordbank').addEventListener('click', () => this.openWordBank());
       document.getElementById('btn-back-from-wordbank').addEventListener('click', () => this.closeWordBank());
       document.getElementById('btn-update-words').addEventListener('click', () => this.updateWords());
-      document.getElementById('btn-fetch-words').addEventListener('click', () => this.fetchRemoteWords());
       document.getElementById('btn-add-word-pair').addEventListener('click', () => this.addWordPair());
       document.querySelectorAll('.diff-btn').forEach(btn => {
         btn.addEventListener('click', () => this.selectDifficulty(btn.dataset.diff));
