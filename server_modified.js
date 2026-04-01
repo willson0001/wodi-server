@@ -265,7 +265,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('JOIN_ROOM', (data) => {
-    const roomId = (data.roomId || '').toUpperCase().trim();
+    const roomId = (data.roomId || '').trim();
     const room = rooms.get(roomId);
     if (!room) {
       socket.emit('ERROR', { message: '房间不存在' });
