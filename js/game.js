@@ -24,6 +24,7 @@
     heartbeatTimer: null,
     init() {
       this.bindEvents();
+      this.bindWindowEvents();
       const params = new URLSearchParams(window.location.search);
       if (params.get('room')) {
         this.showPage('join');
@@ -37,6 +38,18 @@
       } else {
         this.showPage('home');
       }
+    },
+    bindWindowEvents() {
+      window.addEventListener('beforeunload', () => {
+        if (this.socket && this.state.roomId) {
+          this.socket.emit('LEAVE_ROOM', { roomId: this.state.roomId });
+        }
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && this.socket && this.state.roomId) {
+          this.socket.emit('LEAVE_ROOM', { roomId: this.state.roomId });
+        }
+      });
     },
     bindEvents() {
       document.getElementById('btn-create-room').addEventListener('click', () => this.showPage('create'));
@@ -407,10 +420,24 @@
           </div>
         `;
       }).join('');
+
+      const title = document.querySelector('#page-waiting h3');
+      if (title) {
+        title.textContent = `等待玩家加入（${this.state.players.length}人）`;
+      }
+
       const btn = document.getElementById('btn-start-game');
       if (btn) {
         btn.disabled = this.state.players.length < 4;
         btn.textContent = this.state.players.length < 4 ? `还需 ${4 - this.state.players.length} 人` : '开始游戏';
+      } else {
+        const waitingHint = document.querySelector('#page-waiting .waiting-hint');
+        if (waitingHint) {
+          const remain = 4 - this.state.players.length;
+          waitingHint.innerHTML = remain > 0
+            ? `⏳ 等待法官（还差 ${remain} 人）...`
+            : '⏳ 等待法官开始游戏...';
+        }
       }
     },
     renderCurrentPage() {
