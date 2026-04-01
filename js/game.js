@@ -812,21 +812,44 @@
     updateWords() {
       const url = document.getElementById('remote-words-url').value.trim();
       if (!url) return;
+      
+      const btn = document.getElementById('btn-update-words');
+      const msg = document.getElementById('words-result-msg');
+      
+      btn.disabled = true;
+      btn.textContent = '更新中...';
+      msg.style.display = 'block';
+      msg.className = 'info-msg';
+      msg.textContent = '⏳ 正在更新词库，请稍候...';
+      
       this.socket.emit('FETCH_WORDS', { url });
+      
+      this.socket.once('FETCH_WORDS_RESULT', (data) => {
+        btn.disabled = false;
+        btn.textContent = '更新词库';
+        this.onFetchWordsResult(data);
+      });
     },
     onFetchWordsResult(data) {
       let msg = document.getElementById('words-result-msg');
       if (!msg) return;
+      msg.style.display = 'block';
       if (data.success) {
         msg.className = 'success-msg';
         if (data.addedCount !== undefined) {
           msg.textContent = `✅ 更新成功！新增 ${data.addedCount} 组，当前共 ${data.count} 组`;
         } else {
-          msg.textContent = `✅ 当前词库：共 ${data.count} 组`;
+          msg.textContent = `✅ 当前词库：共 ${data.count} 组（版本：${data.version}）`;
         }
       } else {
         msg.className = 'error-msg';
-        msg.textContent = `❌ 更新失败：${data.error}`;
+        if (data.error.includes('timeout')) {
+          msg.textContent = `❌ 更新失败：请求超时，请检查网络连接`;
+        } else if (data.error.includes('Invalid format')) {
+          msg.textContent = `❌ 更新失败：词库格式不正确`;
+        } else {
+          msg.textContent = `❌ 更新失败：${data.error}`;
+        }
       }
     },
     addWordPair() {
