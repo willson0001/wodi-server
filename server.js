@@ -197,9 +197,42 @@ async function fetchRemoteWords(url) {
   try {
     const resp = await axios.get(url, { timeout: 10000 });
     if (resp.data && resp.data.easy && resp.data.normal && resp.data.hard) {
-      words = resp.data;
+      const newWords = resp.data;
+      let addedCount = 0;
+      
+      const existingEasySet = new Set(words.easy.map(w => `${w.wordA}-${w.wordB}`));
+      newWords.easy.forEach(newWord => {
+        const key = `${newWord.wordA}-${newWord.wordB}`;
+        if (!existingEasySet.has(key)) {
+          words.easy.push(newWord);
+          existingEasySet.add(key);
+          addedCount++;
+        }
+      });
+      
+      const existingNormalSet = new Set(words.normal.map(w => `${w.wordA}-${w.wordB}`));
+      newWords.normal.forEach(newWord => {
+        const key = `${newWord.wordA}-${newWord.wordB}`;
+        if (!existingNormalSet.has(key)) {
+          words.normal.push(newWord);
+          existingNormalSet.add(key);
+          addedCount++;
+        }
+      });
+      
+      const existingHardSet = new Set(words.hard.map(w => `${w.wordA}-${w.wordB}`));
+      newWords.hard.forEach(newWord => {
+        const key = `${newWord.wordA}-${newWord.wordB}`;
+        if (!existingHardSet.has(key)) {
+          words.hard.push(newWord);
+          existingHardSet.add(key);
+          addedCount++;
+        }
+      });
+      
+      words.version = new Date().toISOString().split('T')[0];
       fs.writeFileSync(WORDS_FILE, JSON.stringify(words, null, 2));
-      return { success: true, count: words.easy.length + words.normal.length + words.hard.length };
+      return { success: true, addedCount, count: words.easy.length + words.normal.length + words.hard.length };
     }
     return { success: false, error: 'Invalid format' };
   } catch (e) {
