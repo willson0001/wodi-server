@@ -87,6 +87,7 @@
       this.socket.on('HOST_CHANGED', (data) => this.onHostChanged(data));
       this.socket.on('HOST_OFFLINE_WARNING', () => this.onHostOfflineWarning());
       this.socket.on('ROOM_CLOSED', () => this.onRoomClosed());
+      this.socket.on('GAME_RESTARTED', (data) => this.onGameRestarted(data));
       this.socket.on('FETCH_WORDS_RESULT', (data) => this.onFetchWordsResult(data));
       this.socket.on('PING', () => {});
     },
@@ -291,6 +292,9 @@
     },
     playAgain() {
       if (!this.state.isHost) return;
+      this.socket.emit('RESTART_GAME');
+    },
+    onGameRestarted(data) {
       this.state.status = 'waiting';
       this.state.phase = 'waiting';
       this.state.round = 0;
@@ -299,16 +303,10 @@
       this.state.eliminated = null;
       this.state.isTie = false;
       this.state.gameResult = null;
-      this.state.players = this.state.players.map(p => ({
-        ...p,
-        alive: true,
-        role: null,
-        word: null,
-        votedFor: null,
-        isHost: p.id === this.state.playerId
-      }));
-      this.state.hostId = this.state.playerId;
-      this.socket.emit('START_GAME');
+      this.state.votedFor = null;
+      this.state.players = data.players;
+      this.renderWaitingRoom();
+      this.showPage('waiting');
     },
     backToHome() {
       if (this.socket) this.socket.disconnect();
@@ -432,11 +430,9 @@
 
       let judgeWordInfo = '';
       if (isHost) {
-        const spyPlayer = players.find(p => p.role === 'spy');
-        const wordPair = this.state.myWord;
         judgeWordInfo = `
           <div style="background:var(--card2);border-radius:10px;padding:12px;margin-top:10px;font-size:13px;color:var(--text2)">
-            💡 法官词：${wordPair || '?'}
+            💡 你的词：${word || '?'}
           </div>
         `;
       }
