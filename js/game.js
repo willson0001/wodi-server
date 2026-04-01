@@ -32,7 +32,7 @@
         setTimeout(() => {
           const roomIdInput = document.getElementById('join-room-id');
           if (roomIdInput) {
-            roomIdInput.value = roomParam.toUpperCase();
+            roomIdInput.value = roomParam;
             roomIdInput.readOnly = true;
           }
         }, 100);
@@ -195,7 +195,7 @@
     },
     joinRoom() {
       const name = document.getElementById('join-name').value.trim();
-      const roomId = document.getElementById('join-room-id').value.trim().toUpperCase();
+      const roomId = document.getElementById('join-room-id').value.trim();
       if (!name) { this.showError('请输入昵称'); return; }
       if (!roomId || roomId.length !== 4) { this.showError('请输入4位房间号'); return; }
       this.state.playerName = name;
