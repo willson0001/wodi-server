@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>谁是卧底</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <div class="page active" id="page-home">
+      <div style="text-align:center;padding-top:60px">
+        <h1 style="margin-bottom:8px">谁是卧底</h1>
+        <p style="color:var(--text2);font-size:14px;margin-bottom:48px">朋友聚会 · 面对面推理游戏</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <button class="btn btn-primary" id="btn-create-room">创建房间</button>
+        <button class="btn btn-secondary" id="btn-join-room">加入房间</button>
+      </div>
+      <div class="card" style="margin-top:32px">
+        <h3 style="margin-bottom:12px">游戏规则</h3>
+        <p style="font-size:13px;color:var(--text2);line-height:1.8">
+          每人得到一个词语，其中 <strong style="color:var(--primary)">1人是卧底</strong>（词语不同但相似）。<br>
+          轮流描述词语，不能说出词语。<br>
+          所有人投票选出卧底。<br>
+          卧底全部被淘汰 = 平民胜利<br>
+          卧底存活 ≥ 平民存活 = 卧底胜利
+        </p>
+      </div>
+    </div>
+
+    <div class="page" id="page-create">
+      <button class="back-btn" id="btn-back-home">← 返回</button>
+      <h2 style="margin-bottom:20px">创建房间</h2>
+      <div class="card">
+        <div class="input-group" style="margin-bottom:16px">
+          <label>你的昵称</label>
+          <input class="input" id="create-name" type="text" placeholder="请输入昵称" maxlength="10">
+        </div>
+        <div class="input-group">
+          <label style="margin-bottom:10px">选择词库难度</label>
+          <div class="diff-selector">
+            <button class="diff-btn" data-diff="easy">简单</button>
+            <button class="diff-btn selected" data-diff="normal">普通</button>
+            <button class="diff-btn" data-diff="hard">困难</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btn-confirm-create" style="margin-top:20px">创建房间</button>
+      </div>
+    </div>
+
+    <div class="page" id="page-join">
+      <button class="back-btn" id="btn-back-home-join">← 返回</button>
+      <h2 style="margin-bottom:20px">加入房间</h2>
+      <div class="card">
+        <div class="input-group" style="margin-bottom:16px">
+          <label>你的昵称</label>
+          <input class="input" id="join-name" type="text" placeholder="请输入昵称" maxlength="10">
+        </div>
+        <div class="input-group" style="margin-bottom:16px">
+          <label>房间号</label>
+          <input class="input" id="join-room-id" type="text" placeholder="输入4位房间号" maxlength="4" style="text-transform:uppercase;letter-spacing:8px;text-align:center;font-size:20px">
+        </div>
+        <button class="btn btn-primary" id="btn-confirm-join">加入</button>
+      </div>
+    </div>
+
+    <div class="page" id="page-wordbank">
+      <button class="back-btn" id="btn-back-from-wordbank">← 返回</button>
+      <div class="word-bank-header">
+        <h2>词库管理</h2>
+        <span class="word-count-badge" id="word-count-badge">-</span>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <h3 style="margin-bottom:10px">🌐 在线更新词库</h3>
+        <div class="input-group" style="margin-bottom:10px">
+          <input class="input" id="remote-words-url" type="text" placeholder="输入 words.json 的 URL 地址" style="font-size:13px">
+        </div>
+        <div id="words-result-msg" style="margin-bottom:10px;display:none"></div>
+        <button class="btn btn-primary btn-small" id="btn-fetch-words">更新词库</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:10px">➕ 添加自定义词语</h3>
+        <div class="add-word-form">
+          <div class="inputs">
+            <input class="input" id="add-word-a" type="text" placeholder="词语A（如：苹果）">
+            <input class="input" id="add-word-b" type="text" placeholder="词语B（如：梨子）">
+          </div>
+          <button class="btn btn-secondary btn-small" id="btn-add-word-pair">添加到词库</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    document.getElementById('btn-join-room').addEventListener('click', () => App.showPage('join'));
+    document.getElementById('btn-back-home').addEventListener('click', () => App.showPage('home'));
+    document.getElementById('btn-back-home-join').addEventListener('click', () => App.showPage('home'));
+  </script>
+</body>
+</html>
