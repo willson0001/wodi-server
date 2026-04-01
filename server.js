@@ -375,6 +375,63 @@ io.on('connection', (socket) => {
     console.log(`Game started in room ${currentRoomId}`);
   });
 
+  socket.on('KICK_PLAYER', (data) => {
+    if (!currentRoomId || !currentPlayerId) return;
+    const room = rooms.get(currentRoomId);
+    if (!room) return;
+    if (room.hostId !== currentPlayerId) {
+      socket.emit('ERROR', { message: '只有法官可以踢人' });
+      return;
+    }
+    const targetId = data.targetId;
+    if (!targetId || targetId === currentPlayerId) return;
+    if (!room.players.has(targetId)) return;
+    const targetSocketId = playerRooms.get(targetId);
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('KICKED');
+    }
+    room.players.delete(targetId);
+    playerRooms.delete(targetId);
+    playerHeartbeat.delete(targetId);
+    io.to(currentRoomId).emit('PLAYER_LEFT', {
+      playerId: targetId,
+      players: getPlayersSnapshot(currentRoomId).map(p => ({
+        id: p.id, name: p.name, number: p.number, isHost: p.isHost, alive: p.alive
+      }))
+    });
+    if (room.players.size === 0) {
+      rooms.delete(currentRoomId);
+    }
+    console.log(`Player ${targetId} kicked from room ${currentRoomId}`);
+  });
+
+  socket.on('REASSIGN_WORDS', () => {
+    if (!currentRoomId || !currentPlayerId) return;
+    const room = rooms.get(currentRoomId);
+    if (!room) return;
+    if (room.hostId !== currentPlayerId) {
+      socket.emit('ERROR', { message: '只有法官可以换词' });
+      return;
+    }
+    if (room.status !== 'playing') return;
+    assignRolesAndWords(currentRoomId);
+    room.players.forEach((p, id) => {
+      const sid = playerRooms.get(id);
+      if (sid) {
+        io.to(sid).emit('GAME_STARTED', {
+          round: room.round,
+          phase: room.phase,
+          myWord: p.word,
+          myRole: null,
+          players: getPlayersSnapshot(currentRoomId).map(pl => ({
+            id: pl.id, name: pl.name, number: pl.number, isHost: pl.isHost, alive: pl.alive
+          }))
+        });
+      }
+    });
+    console.log(`Words reassigned in room ${currentRoomId}`);
+  });
+
   socket.on('SET_PHASE', (data) => {
     if (!currentRoomId || !currentPlayerId) return;
     const room = rooms.get(currentRoomId);
