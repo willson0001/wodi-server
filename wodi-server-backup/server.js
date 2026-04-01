@@ -582,11 +582,11 @@ io.on('connection', (socket) => {
     playerHeartbeat.set(currentPlayerId, Date.now());
     const room = rooms.get(currentRoomId);
     if (room && room.hostId) {
-      const lastBeat = playerHeartbeat.get(room.hostId) || 0;
-      if (Date.now() - lastBeat > 120000 && room.status === 'playing') {
-        socket.emit('HOST_OFFLINE_WARNING');
+        const lastBeat = playerHeartbeat.get(room.hostId) || 0;
+        if (Date.now() - lastBeat > 120000 && room.status === 'playing') {
+          io.to(currentRoomId).emit('HOST_OFFLINE_WARNING');
+        }
       }
-    }
   });
 
   socket.on('LEAVE_ROOM', (data) => {
@@ -631,20 +631,23 @@ io.on('connection', (socket) => {
       
       if (currentPlayerId === room.hostId) {
         io.to(currentRoomId).emit('HOST_OFFLINE_WARNING');
+        // 标记法官离线，但不立即删除，等待接管
+        console.log(`Host ${currentPlayerId} disconnected from room ${currentRoomId}`);
       }
       
+      // 无论游戏状态如何，当玩家断开连接时，都发送 PLAYER_LEFT 事件
       if (room.status === 'waiting') {
         room.players.delete(currentPlayerId);
-        io.to(currentRoomId).emit('PLAYER_LEFT', {
-          playerId: currentPlayerId,
-          playerName: player?.name,
-          players: getPlayersSnapshot(currentRoomId).map(p => ({
-            id: p.id, name: p.name, number: p.number, isHost: p.isHost, alive: p.alive
-          }))
-        });
-        if (room.players.size === 0) {
-          rooms.delete(currentRoomId);
-        }
+      }
+      io.to(currentRoomId).emit('PLAYER_LEFT', {
+        playerId: currentPlayerId,
+        playerName: player?.name,
+        players: getPlayersSnapshot(currentRoomId).map(p => ({
+          id: p.id, name: p.name, number: p.number, isHost: p.isHost, alive: p.alive
+        }))
+      });
+      if (room.players.size === 0) {
+        rooms.delete(currentRoomId);
       }
     }
   });

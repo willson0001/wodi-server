@@ -322,7 +322,12 @@
       this.renderGamePage();
     },
     onHostOfflineWarning() {
-      console.log('HOST_OFFLINE_WARNING received');
+      console.log('HOST_OFFLINE_WARNING received - hostOfflineWarning set to true');
+      console.log('Current state:', {
+        isHost: this.state.isHost,
+        hostOfflineWarning: this.state.hostOfflineWarning,
+        players: this.state.players.map(p => ({id: p.id, name: p.name, isHost: p.isHost}))
+      });
       this.state.hostOfflineWarning = true;
       this.renderHostOfflineBar();
     },
